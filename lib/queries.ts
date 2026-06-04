@@ -129,6 +129,59 @@ export function aggregateBySite(data: DashboardData) {
   return Array.from(bySite.values())
 }
 
+export type AlarmDetail = {
+  alarm: Alarm
+  device: (Device & { rated_power_kw: number | null }) | null
+  site: Site | null
+  threshold: { performance_ratio_min: number; module_temp_warning_c: number; module_temp_critical_c: number; voltage_min_v: number; voltage_max_v: number; frequency_min_hz: number; frequency_max_hz: number } | null
+  contextPoints: Array<{ ts: string; value: number | null }>
+  contextMetric: 'ac_power_w' | 'module_temp_c' | 'ac_voltage_v' | null
+}
+
+export async function loadAlarmDetail(alarmId: string): Promise<AlarmDetail | null> {
+  const sb = supabaseAdmin()
+  const alarmRes = await sb.from('alarms').select('id,site_id,device_id,severity,code,message,status,created_at,acknowledged_at,cleared_at').eq('id', alarmId).maybeSingle()
+  if (alarmRes.error) throw alarmRes.error
+  if (!alarmRes.data) return null
+  const alarm = alarmRes.data as Alarm & { acknowledged_at: string | null; cleared_at: string | null }
+
+  const [deviceRes, siteRes, thresholdRes] = await Promise.all([
+    alarm.device_id ? sb.from('devices').select('id,site_id,kind,manufacturer,model,serial_number,status,rated_power_kw').eq('id', alarm.device_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    alarm.site_id ? sb.from('sites').select('id,name,city,peak_power_kwp,gps_lat,gps_lng,client_name').eq('id', alarm.site_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    alarm.site_id ? sb.from('alarm_thresholds').select('performance_ratio_min,module_temp_warning_c,module_temp_critical_c,voltage_min_v,voltage_max_v,frequency_min_hz,frequency_max_hz').eq('site_id', alarm.site_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+  ])
+
+  const contextMetric: AlarmDetail['contextMetric'] =
+    alarm.code === 'PERF_LOW' ? 'ac_power_w' :
+    alarm.code === 'TEMP_HIGH' ? 'module_temp_c' :
+    alarm.code === 'GRID_VOLTAGE_HIGH' ? 'ac_voltage_v' :
+    'ac_power_w'
+
+  let contextPoints: Array<{ ts: string; value: number | null }> = []
+  if (alarm.device_id && contextMetric) {
+    const since = new Date(new Date(alarm.created_at).getTime() - 12 * 3_600_000).toISOString()
+    const until = new Date(new Date(alarm.created_at).getTime() + 12 * 3_600_000).toISOString()
+    const measRes = await sb
+      .from('measurements')
+      .select(`ts,${contextMetric}`)
+      .eq('device_id', alarm.device_id)
+      .gte('ts', since)
+      .lte('ts', until)
+      .order('ts')
+    if (measRes.error) throw measRes.error
+    contextPoints = (measRes.data ?? []).map((r) => ({ ts: r.ts as string, value: (r as Record<string, unknown>)[contextMetric] as number | null }))
+  }
+
+  return {
+    alarm,
+    device: deviceRes.data as (Device & { rated_power_kw: number | null }) | null,
+    site: siteRes.data as Site | null,
+    threshold: thresholdRes.data as AlarmDetail['threshold'],
+    contextPoints,
+    contextMetric,
+  }
+}
+
 export function computeKpis(data: DashboardData) {
   let totalPowerW = 0
   let totalEnergyTodayWh = 0
