@@ -70,7 +70,13 @@ export default function LiveDashboard({ initial }: { initial: LiveData }) {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Kpi label="Producție azi" value={data.totalEnergyTodayKwh.toFixed(1)} unit="kWh" color="amber" />
         <Kpi label="Putere acum" value={data.totalPowerKw.toFixed(1)} unit="kW" color="green" />
-        <Kpi label="Performance Ratio" value={data.performanceRatioPct != null ? `${data.performanceRatioPct}` : '—'} unit={data.performanceRatioPct != null ? '%' : 'noaptea'} color={prCritical ? 'red' : 'blue'} />
+        <Kpi
+          label="Performance Ratio"
+          tooltip="Raport între producția reală și producția estimată din modelul PVGIS pentru aceleași condiții (iradianță, temperatură, geometrie). Sub 80% = posibilă problemă: murdărie panouri, umbrire, defect string."
+          value={data.performanceRatioPct != null ? `${data.performanceRatioPct}` : '—'}
+          unit={data.performanceRatioPct != null ? '%' : 'noaptea'}
+          color={prCritical ? 'red' : 'blue'}
+        />
         <Kpi label="Alarme active" value={`${data.activeAlarms}`} unit={data.activeAlarms === 1 ? 'alarmă' : 'alarme'} color={data.activeAlarms > 0 ? 'red' : 'zinc'} />
       </section>
 
@@ -91,7 +97,7 @@ export default function LiveDashboard({ initial }: { initial: LiveData }) {
   )
 }
 
-function Kpi({ label, value, unit, color }: { label: string; value: string; unit: string; color: 'amber' | 'green' | 'blue' | 'red' | 'zinc' }) {
+function Kpi({ label, value, unit, color, tooltip }: { label: string; value: string; unit: string; color: 'amber' | 'green' | 'blue' | 'red' | 'zinc'; tooltip?: string }) {
   const colorMap = {
     amber: 'text-amber-600 dark:text-amber-400',
     green: 'text-green-600 dark:text-green-400',
@@ -100,8 +106,18 @@ function Kpi({ label, value, unit, color }: { label: string; value: string; unit
     zinc: 'text-zinc-600 dark:text-zinc-400',
   } as const
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
-      <p className="text-xs text-zinc-500 uppercase tracking-wide">{label}</p>
+    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 relative group">
+      <p className="text-xs text-zinc-500 uppercase tracking-wide flex items-center gap-1">
+        {label}
+        {tooltip && (
+          <span
+            title={tooltip}
+            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 text-[9px] font-bold cursor-help"
+          >
+            i
+          </span>
+        )}
+      </p>
       <p className={`mt-2 text-3xl font-semibold tabular-nums ${colorMap[color]}`}>
         {value}<span className="ml-1 text-base font-normal text-zinc-500">{unit}</span>
       </p>

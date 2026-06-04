@@ -23,6 +23,13 @@ export default async function Home() {
         </p>
       </header>
 
+      <aside className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl p-4 text-xs flex flex-col sm:flex-row gap-3 sm:items-center">
+        <span className="text-amber-600 dark:text-amber-400 shrink-0 font-semibold">ℹ Sursa datelor</span>
+        <p className="text-amber-900 dark:text-amber-100 leading-relaxed">
+          Istoricul (30 zile orare) provine din <a href="https://re.jrc.ec.europa.eu/pvg_tools/en/" target="_blank" rel="noopener" className="underline font-medium">PVGIS v5_3 — JRC European Commission</a> pentru coordonatele reale ale celor 3 site-uri RO. Valorile „live" (refresh 5s) sunt computate sintetic din curba PVGIS pentru ora curentă + jitter ±4%. Cronul Vercel salvează măsurători noi în baza de date la fiecare minut.
+        </p>
+      </aside>
+
       <LiveDashboard initial={live} />
 
       <section className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
