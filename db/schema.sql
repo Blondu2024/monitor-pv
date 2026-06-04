@@ -1,16 +1,8 @@
--- Monitor-PV schema
--- Rulează în Supabase SQL Editor după ce ai creat proiectul.
+-- Monitor-PV schema (Supabase project DEDICAT pt monitor-pv, separat de CreazaApp)
+-- Rulează în Supabase SQL Editor sau via Management API.
 -- Praguri implicite din lucrare cap 4.5 (Profire Radu): 80% randament, 65°C warning, 75°C critic.
 
 create extension if not exists "pgcrypto";
-
--- Users (extensie a auth.users din Supabase)
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  full_name text,
-  role text not null default 'operator' check (role in ('admin', 'operator', 'viewer')),
-  created_at timestamptz not null default now()
-);
 
 -- Site-uri (centrale PV per locație)
 create table if not exists public.sites (
@@ -84,7 +76,7 @@ create table if not exists public.alarms (
   status text not null default 'active' check (status in ('active', 'acknowledged', 'cleared')),
   created_at timestamptz not null default now(),
   acknowledged_at timestamptz,
-  acknowledged_by uuid references public.profiles(id),
+  acknowledged_by uuid,
   cleared_at timestamptz
 );
 
@@ -105,17 +97,21 @@ create table if not exists public.alarm_thresholds (
   offline_timeout_seconds int not null default 60
 );
 
--- RLS (deschis pt MVP, ușor de strâns ulterior)
-alter table public.profiles enable row level security;
+-- RLS: pt MVP demo lăsăm read public (anon). Strângem când punem auth real.
 alter table public.sites enable row level security;
 alter table public.devices enable row level security;
 alter table public.measurements enable row level security;
 alter table public.alarms enable row level security;
 alter table public.alarm_thresholds enable row level security;
 
-create policy "read all for authenticated" on public.sites for select using (auth.role() = 'authenticated');
-create policy "read all for authenticated" on public.devices for select using (auth.role() = 'authenticated');
-create policy "read all for authenticated" on public.measurements for select using (auth.role() = 'authenticated');
-create policy "read all for authenticated" on public.alarms for select using (auth.role() = 'authenticated');
-create policy "read all for authenticated" on public.alarm_thresholds for select using (auth.role() = 'authenticated');
-create policy "read own profile" on public.profiles for select using (id = auth.uid());
+drop policy if exists "read all anon" on public.sites;
+drop policy if exists "read all anon" on public.devices;
+drop policy if exists "read all anon" on public.measurements;
+drop policy if exists "read all anon" on public.alarms;
+drop policy if exists "read all anon" on public.alarm_thresholds;
+
+create policy "read all anon" on public.sites for select using (true);
+create policy "read all anon" on public.devices for select using (true);
+create policy "read all anon" on public.measurements for select using (true);
+create policy "read all anon" on public.alarms for select using (true);
+create policy "read all anon" on public.alarm_thresholds for select using (true);
