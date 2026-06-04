@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 const NAV = [
   { href: '/', label: 'Dashboard' },
   { href: '/sites', label: 'Site-uri' },
+  { href: '/ghid', label: 'Ghid' },
 ]
 
 export default function NavHeader() {
