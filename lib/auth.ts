@@ -5,8 +5,16 @@ import { z } from 'zod'
 import { createSupabaseServer } from './supabase/server'
 
 const LoginSchema = z.object({
-  email: z.email({ error: 'Introdu o adresă de email validă.' }),
-  password: z.string().min(1, { error: 'Parola este obligatorie.' }),
+  // Tolerează spații/majuscule accidentale (autocapitalizare pe mobil) la email.
+  email: z.preprocess(
+    (v) => (typeof v === 'string' ? v.trim().toLowerCase() : v),
+    z.email({ error: 'Introdu o adresă de email validă.' })
+  ),
+  // Tolerează spații la început/sfârșit (artefacte de copy-paste).
+  password: z.preprocess(
+    (v) => (typeof v === 'string' ? v.trim() : v),
+    z.string().min(1, { error: 'Parola este obligatorie.' })
+  ),
   next: z.string().optional(),
 })
 
