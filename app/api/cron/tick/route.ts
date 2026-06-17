@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { computeInstantMetrics, computeCurrentAcPowerW } from '@/lib/live-curve'
+import { runAlarmEngine } from '@/lib/alarm-engine'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -126,5 +127,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: `Insert failed ${insertRes.status}: ${(await insertRes.text()).slice(0, 300)}` }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true, inserted: rows.length, ts })
+  // Motor alarme: evaluează măsurătorile noi vs praguri, creează alarme + email la critice.
+  let alarms = { created: 0, emailed: 0 }
+  try {
+    alarms = await runAlarmEngine(sb, rows as Parameters<typeof runAlarmEngine>[1])
+  } catch {
+    /* nu blocăm cronul dacă motorul de alarme eșuează */
+  }
+
+  return NextResponse.json({ ok: true, inserted: rows.length, ts, alarms })
 }

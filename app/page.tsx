@@ -3,6 +3,7 @@ import { loadDashboard, type Alarm } from '@/lib/queries'
 import { computeLiveData } from '@/lib/live'
 import ProductionRangeChart from './components/ProductionRangeChart'
 import LiveDashboard from './components/LiveDashboard'
+import TestAlertButton from './components/TestAlertButton'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -37,7 +38,13 @@ export default async function Home() {
       </section>
 
       <section className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
-        <h2 className="text-sm font-medium text-zinc-500 mb-3">Alarme recente</h2>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <h2 className="text-sm font-medium text-zinc-500">Alarme recente</h2>
+            <p className="text-[11px] text-zinc-400 mt-0.5">Alarmele critice noi se trimit automat pe email (Resend).</p>
+          </div>
+          <TestAlertButton />
+        </div>
         {data.recentAlarms.length === 0 ? (
           <p className="text-sm text-zinc-500">Nicio alarmă înregistrată.</p>
         ) : (
