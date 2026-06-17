@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { logout } from '@/lib/auth'
 
 const NAV = [
   { href: '/', label: 'Dashboard' },
@@ -9,33 +10,58 @@ const NAV = [
   { href: '/ghid', label: 'Ghid' },
 ]
 
-export default function NavHeader() {
+export default function NavHeader({ userEmail }: { userEmail: string | null }) {
   const pathname = usePathname()
   return (
     <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-14 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href={userEmail ? '/' : '/login'} className="flex items-center gap-2 group">
           <SunLogo />
           <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Monitor<span className="text-amber-500">·</span>PV</span>
         </Link>
-        <nav className="flex items-center gap-1">
-          {NAV.map((item) => {
-            const active = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  active
-                    ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
-                }`}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+
+        {userEmail ? (
+          <div className="flex items-center gap-1 sm:gap-2">
+            <nav className="flex items-center gap-1">
+              {NAV.map((item) => {
+                const active = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      active
+                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+            <div className="flex items-center gap-2 pl-2 sm:pl-3 ml-1 sm:ml-2 border-l border-zinc-200 dark:border-zinc-800">
+              <span className="hidden md:inline text-xs text-zinc-500 max-w-[14rem] truncate" title={userEmail}>
+                {userEmail}
+              </span>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  Ieșire
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="px-3 py-1.5 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white transition-colors"
+          >
+            Autentificare
+          </Link>
+        )}
       </div>
     </header>
   )
