@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 /** Pagini publice (fără autentificare). Restul aplicației e protejat. */
 const PUBLIC_PATHS = [
   '/login',
+  '/signup',
   '/about',
   '/privacy',
   '/terms',
@@ -70,8 +71,8 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     return redirect
   }
 
-  // Autentificat dar pe /login → trimite-l în dashboard
-  if (user && pathname === '/login') {
+  // Autentificat dar pe /login sau /signup → trimite-l în dashboard
+  if (user && (pathname === '/login' || pathname === '/signup')) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     url.search = ''

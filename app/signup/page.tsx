@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import LoginForm from './LoginForm'
+import SignupForm from './SignupForm'
 
 export const metadata: Metadata = {
-  title: 'Autentificare · Monitor-PV',
-  description: 'Acces securizat la platforma de monitorizare fotovoltaică.',
+  title: 'Creează cont · Monitor-PV',
+  description: 'Înregistrare cont nou pentru platforma de monitorizare fotovoltaică.',
 }
 
-export default async function LoginPage({
+export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ next?: string }>
@@ -22,19 +22,17 @@ export default async function LoginPage({
           <h1 className="text-xl font-semibold tracking-tight">
             Monitor<span className="text-amber-500">·</span>PV
           </h1>
-          <p className="text-sm text-zinc-500">
-            Autentifică-te pentru a accesa dashboard-ul de monitorizare.
-          </p>
+          <p className="text-sm text-zinc-500">Creează un cont nou pentru a accesa dashboard-ul.</p>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
-          <LoginForm next={next} />
+          <SignupForm next={next} />
         </div>
 
         <p className="text-center text-sm text-zinc-500">
-          Nu ai cont?{' '}
-          <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="text-amber-600 dark:text-amber-400 font-medium hover:underline">
-            Creează unul
+          Ai deja cont?{' '}
+          <Link href={`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="text-amber-600 dark:text-amber-400 font-medium hover:underline">
+            Autentifică-te
           </Link>
         </p>
       </div>
