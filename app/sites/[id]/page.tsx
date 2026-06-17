@@ -184,6 +184,13 @@ function DeviceSection({
                 <DeviceStatusDot status={d.status} lastSeen={lastSeen} />
               </div>
               {renderMetrics(d, m)}
+              <Link
+                href={`/devices/${d.id}`}
+                className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              >
+                Parametri dispozitiv
+                <span aria-hidden>›</span>
+              </Link>
             </div>
           )
         })}

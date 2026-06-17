@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { loadDashboard, type Alarm } from '@/lib/queries'
 import { computeLiveData } from '@/lib/live'
-import ProductionChart from './components/ProductionChart'
+import ProductionRangeChart from './components/ProductionRangeChart'
 import LiveDashboard from './components/LiveDashboard'
 
 export const dynamic = 'force-dynamic'
@@ -33,8 +33,7 @@ export default async function Home() {
       <LiveDashboard initial={live} />
 
       <section className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
-        <h2 className="text-sm font-medium text-zinc-500 mb-2">Producție 24h (istoric DB · 3 site-uri)</h2>
-        <ProductionChart data={data.hourly24h} />
+        <ProductionRangeChart />
       </section>
 
       <section className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
